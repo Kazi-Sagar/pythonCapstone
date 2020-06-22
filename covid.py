@@ -17,16 +17,21 @@ ctx.verify_mode = ssl.CERT_NONE
 conn = sqlite3.connect('database.sqlite')
 cur = conn.cursor()
 
-#open these 3 lines when Database needs to be deleted
+#open these 4 lines when Database needs to be deleted
 #cur.execute('''DROP TABLE IF EXISTS CoronaUpdate ''')
 #cur.execute('''DROP TABLE IF EXISTS Country ''')
 #cur.execute('''DROP TABLE IF EXISTS Continent ''')
+#cur.execute('''DROP TABLE IF EXISTS DaysPer10k ''')
 
 cur.execute('''CREATE TABLE IF NOT EXISTS Covid_BD
     (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     Date TEXT UNIQUE,Total_Cases REAL, New_Cases REAL,
     Total_Deaths REAL, New_Deaths REAL, D_Case_Incrs,
     D_Death_Incrs, Daily_DR, O_Death_Rate REAL)''')
+
+cur.execute('''CREATE TABLE IF NOT EXISTS DaysPer10k
+    (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    Days INTEGER)''')
 
 url = input('\nEnter Dataset URL: ')
 print('\nParsing data...')
@@ -80,27 +85,13 @@ for item in info["BGD"]:
         caseCount = caseCount + 10000
         daysPer10k.append(per10k)
         per10k = 0
+conn.commit()
 
+for item in daysPer10k:
+    cur.execute('INSERT OR IGNORE INTO DaysPer10k (Days) VALUES ( ? )', ( item, ) )
 conn.commit()
 
 print('\nDatabase successfully updated!')
+print('\nExecute analyze.py to view analysis.')
+
 cur.close()
-print('\n================================================================================\n')
-print('***** Bangladesh: Latest COVID-19 update *****\n')
-
-print('Date:',date)
-print('New Cases:',new_cases)
-print('New Deaths:',new_deaths)
-print('Cases increased/decreased:',case_increased)
-print('Deaths increased/decreased:',death_increased)
-print('Daily death rate:',daily_dr)
-
-print('\nTotal cases:',total_cases)
-print('Total deaths:',total_deaths)
-print('Overall death rate:',death_rate)
-
-print('\nEvery next 10K COVID-19 cases increased in:\n')
-ithDay = 1
-for item in daysPer10k:
-    print(ithDay,'->',item,'days')
-    ithDay = ithDay + 1

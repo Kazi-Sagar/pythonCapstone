@@ -5,7 +5,7 @@ Execute the files in the follwing sequence:
 Depending on the size of the data,
 it may take between 1-15 minues to complete execution.
 
-2. gline.py
+2. analyze.py
 
 it may take between 1-5 seconds to complete execution.
 
